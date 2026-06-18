@@ -47,21 +47,21 @@ export default function Home({ navigation }) {
 
         <View>
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 5 }}>
-            <Text style={{ fontSize: 16, fontWeight: "500", maxWidth: 100 }} numberOfLines={1}>
+            <Text style={{ fontSize: 14, fontWeight: "bold" , maxWidth: 100 }} numberOfLines={1}>
               {item.title}
             </Text>
 
             <TouchableOpacity onPress={() => toggleFavorite(item)}>
-              <MaterialIcons name={isLoved ? "favorite" : "favorite-outline"} size={24} color={isLoved ? "#BF1A1A" : "#707070"} />
+              <MaterialIcons name={isLoved ? "favorite" : "favorite-outline"} size={22} color={isLoved ? "#BF1A1A" : "#707070"} />
             </TouchableOpacity>
           </View>
         </View>
 
         <View>
-          <Text>Rp {item.price.toLocaleString("id-ID")}</Text>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 5, marginTop: 3 }}>
-            <Text>⭐</Text>
-            <Text>{item.rating}</Text>
+          <Text style={{ fontSize: 12, color: '#666', marginTop: 2 }}>Rp {item.price.toLocaleString("id-ID")}</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 5, marginTop: 5 }}>
+            <Text style={{ fontSize: 12 }}>⭐</Text>
+            <Text style={{ fontSize: 12, fontWeight: '500' }}>{item.rating}</Text>
 
             {/* Tombol Add to Cart */}
             <TouchableOpacity style={{ marginLeft: "auto" }} onPress={() => addToCart(item)}>
@@ -75,9 +75,11 @@ export default function Home({ navigation }) {
 
   return (
     <SafeAreaProvider style={{ backgroundColor: "#FFFFFF" }}>
-      <SafeAreaView>
-        <ScrollView>
-          {/* search */}
+      <SafeAreaView style={{ flex:1}}>
+        {/* PERBAIKAN SCROLL: Menambahkan contentContainerStyle dan menghapus padding berlebih di bawah */}
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
+          
+          {/* SEARCH BAR */}
           <View style={styles.headerSearch}>
             <View style={styles.searchBox}>
               <TouchableOpacity>
@@ -97,55 +99,60 @@ export default function Home({ navigation }) {
               </View>
             </TouchableOpacity>
           </View>
-          {/* end search */}
 
-          {/* hero section */}
+          {/* HERO SECTION */}
           <View style={styles.heroSection}>
-            <Swiper
-              autoplay
-              showsPagination
-              dotStyle={{ width: 6, height: 6, borderRadius: 5, backgroundColor: "#ccc" }}
-              activeDotStyle={{ width: 6, height: 6, borderRadius: 6, backgroundColor: "#44C7EA" }}
-              style={{ paddingTop: 10, alignContent: "center", paddingStart: 15, paddingHorizontal: 5 }}
-            >
-              <Image source={Hero1} style={{ width: 120, height: 120 }} />
-              <Image source={Hero2} style={{ width: 100, height: 100 }} />
-              <Image source={Hero3} style={{ width: 120, height: 100 }} />
-            </Swiper>
+            {/* Kiri: Swiper dibungkus View dengan lebar dan tinggi PASTI agar tidak tumpang tindih */}
+            <View style={{ width: 140, height: 140 }}>
+              <Swiper
+                autoplay
+                autoplayTimeout={3}
+                showsPagination
+                dotStyle={{ width: 6, height: 6, borderRadius: 5, backgroundColor: "#ccc", marginBottom: -25 }}
+                activeDotStyle={{ width: 6, height: 6, borderRadius: 6, backgroundColor: "#44C7EA", marginBottom: -25 }}
+              >
+                {/* Setiap gambar dibungkus View (slide) agar posisinya pas di tengah */}
+                <View style={styles.slide}><Image source={Hero1} style={styles.heroImage} /></View>
+                <View style={styles.slide}><Image source={Hero2} style={styles.heroImage} /></View>
+                <View style={styles.slide}><Image source={Hero3} style={styles.heroImage} /></View>
+              </Swiper>
+            </View>
 
-            <View style={{ width: 180, height: 100, justifyContent: "center", alignItems: "flex-start", gap: 5, paddingHorizontal: 5 }}>
-              <Text style={{ fontSize: 10, fontWeight: "500", marginBottom: 10 }}>Selamat Datang di Agacy StoryHouse</Text>
-              <Text style={{ fontSize: 12, fontWeight: "500" }}>Tempat dimana menjual berbagai jenis buku novel terpopuler serta paling menarik untuk anda</Text>
+            {/* Kanan: Teks Promo */}
+            <View style={styles.heroTextContainer}>
+              <Text style={{ fontSize: 12, fontWeight: "bold", marginBottom: 8, color: '#333' }}>Selamat Datang di Agacy StoryHouse</Text>
+              <Text style={{ fontSize: 10, fontWeight: "500", color: '#666', lineHeight: 16 }}>Tempat dimana menjual berbagai jenis buku novel terpopuler serta paling menarik untuk anda</Text>
             </View>
           </View>
-          {/* end hero */}
+          {/* END HERO SECTION */}
 
-          {/* Buku terpopular */}
+          {/* NOVEL TERPOPULER */}
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, marginBottom: 10 }}>
-            <Text style={{ fontSize: 16, fontWeight: "500", color: "#44C7EA" }}>Novel Terpopuler</Text>
-            <TouchableOpacity style={{ backgroundColor: "#F1F2F1", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }} onPress={() => navigation.navigate("PopulerBookScreen")}>
-              <Text>Lainnya</Text>
+            <Text style={{ fontSize: 16, fontWeight: "bold", color: "#44C7EA" }}>Novel Terpopuler</Text>
+            <TouchableOpacity style={{ backgroundColor: "#F1F2F1", paddingHorizontal: 12, paddingVertical: 5, borderRadius: 8 }} onPress={() => navigation.navigate("PopulerBookScreen")}>
+              <Text style={{ fontSize: 12, fontWeight: '500' }}>Lainnya</Text>
             </TouchableOpacity>
           </View>
 
           <View style={{ marginHorizontal: 10 }}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {/* Mapping Data Popular Books */}
               {popularBooks.map((book) => renderBookItem(book, "popular"))}
             </ScrollView>
           </View>
-          {/* end Buku terpopular */}
 
-          {/* produk terbaru */}
+          {/* NOVEL TERBARU */}
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, marginBottom: 10, marginTop: 20 }}>
-            <Text style={{ fontSize: 16, fontWeight: "500", color: "#44C7EA" }}>Novel Terbaru</Text>
-            <TouchableOpacity style={{ backgroundColor: "#F1F2F1", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }} onPress={() => navigation.navigate("NewBookScreen")}>
-              <Text>Lainnya</Text>
+            <Text style={{ fontSize: 16, fontWeight: "bold", color: "#44C7EA" }}>Novel Terbaru</Text>
+            <TouchableOpacity style={{ backgroundColor: "#F1F2F1", paddingHorizontal: 12, paddingVertical: 5, borderRadius: 8 }} onPress={() => navigation.navigate("NewBookScreen")}>
+              <Text style={{ fontSize: 12, fontWeight: '500' }}>Lainnya</Text>
             </TouchableOpacity>
           </View>
 
-          <View style={{ marginTop: 10, paddingBottom: 50 }}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap", marginHorizontal: 10 }}>{newBooks.map((book) => renderBookItem(book, "terbaru"))}</View>
+          
+          <View style={{ marginTop: 10 }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap", marginHorizontal: 10 }}>
+              {newBooks.map((book) => renderBookItem(book, "terbaru"))}
+            </View>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -198,43 +205,62 @@ const styles = StyleSheet.create({
   heroSection: {
     backgroundColor: "#F1F2F1",
     marginTop: 15,
-    marginBottom: 30,
-    marginHorizontal: 10,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    height: 180,
-    justifyContent: "space-between",
-    flexDirection: "row",
+    marginBottom: 25,
+    marginHorizontal: 15,
+    paddingHorizontal: 15,
+    borderRadius: 15,
+    height: 160,
+    flexDirection: "row", // Kiri: Swiper, Kanan: Text
     alignItems: "center",
-    paddingVertical: 10,
-    elevation: 5,
+    elevation: 3,
     shadowColor: "black",
+    shadowOpacity:0.1,
+    shadowOffset:{width:0, height:2},
+  },
+  slide:{
+    flex:1,
+    justifyContent:"center",
+    alignItems:"center",
+  },
+  heroImage: {
+    width: 110,
+    height: 110,
+    resizeMode: "contain", // Memastikan gambar tidak terpotong
+  },
+  heroTextContainer: {
+    flex: 1, 
+    justifyContent: "center",
+    paddingLeft: 10,
   },
   popularCard: {
-    backgroundColor: "#f1f2f1",
+    backgroundColor: "#fff",
     borderRadius: 10,
-    padding: 8,
-    elevation: 5,
+    padding: 10,
+    elevation: 3,
     shadowColor: "black",
+    shadowOpacity:0.1,
+    shadowOffset:{width:0, height:2},
     marginHorizontal: 8,
     marginVertical: 10,
     width: 160,
   },
   popularImage: {
     width: "100%",
-    height: 240,
+    height: 200,
     borderRadius: 8,
     resizeMode: "cover",
   },
   newCard: {
-    backgroundColor: "#f1f2f1",
+    backgroundColor: "#fff",
     borderRadius: 10,
-    padding: 8,
-    elevation: 5,
+    padding: 10,
+    elevation: 3,
     shadowColor: "black",
+    shadowOpacity:0.1,
+    shadowOffset:{width:0, height:2},
     marginHorizontal: 5,
     marginVertical: 10,
-    width: "46%",
+    width: "47%",
   },
   newImage: {
     width: "100%",
