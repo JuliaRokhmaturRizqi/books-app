@@ -76,7 +76,7 @@ export default function Card({ navigation }) {
             <Text style={styles.bookPrice}>{formatRupiah(item.price)}</Text>
           </View>
           {/* Tombol Hapus */}
-          <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item.id)}>
+          <TouchableOpacity style={styles.deleteButton} onPress={() => removeFromCart(item.id)}>
             <Text style={styles.deleteText}>Hapus</Text>
           </TouchableOpacity>
         </View>

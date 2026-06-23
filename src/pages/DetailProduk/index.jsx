@@ -84,7 +84,7 @@ Meskipun Jaehyun berhasil mencuri ciuman pertamanya, itu bukan alasan untuk jatu
   };
 
   return (
-    <SafeAreaProvider style={{ backgroundColor: "#ffffff" }}>
+    <SafeAreaProvider style={{ flex:1, backgroundColor: "#ffffff" }}>
       <SafeAreaView style={{ flex: 1 }}>
         {/** Header */}
         <View style={styles.header}>
@@ -105,7 +105,7 @@ Meskipun Jaehyun berhasil mencuri ciuman pertamanya, itu bukan alasan untuk jatu
           </TouchableOpacity>
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false} style={{ marginHorizontal: 30 }} contentContainerStyle={{ paddingBottom: 100 }}>
+        <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginHorizontal: 30 }} contentContainerStyle={{ paddingBottom: 100 }}>
           {/** Box Detail */}
           <View style={styles.ContainerBox}>
             <View style={styles.BoxImage}>
