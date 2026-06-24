@@ -6,6 +6,7 @@ import { Splash } from "../../assets/image";
 import { Google, Facebook, Twitter } from "../../assets/image";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "../../services/api";
 
 // --- DATA DUMMY AKUN GOOGLE
 const DUMMY_GOOGLE_ACCOUNTS = [
@@ -24,19 +25,60 @@ export default function Register({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingText, setLoadingText] = useState("Memuat...");
 
-  // --- LOGIKA REGISTER MANUAL ---
+// --- LOGIKA REGISTER KE API LARAVEL ---
   const handleRegister = async () => {
+    // 1. Validasi Input Kosong
     if (!username || !email || !password) {
-      Alert.alert("Error", "Semua kolom harus diisi!");
+      Alert.alert("Perhatian", "Semua kolom harus diisi!");
       return;
     }
+
+    // 2. Validasi Panjang Password (opsional, karena di Laravel kita atur min:6)
+    if (password.length < 6) {
+      Alert.alert("Perhatian", "Password harus terdiri dari minimal 6 karakter.");
+      return;
+    }
+
+    setLoadingText("Mendaftarkan akun...");
+    setIsLoading(true);
+
     try {
-      const userData = { username, email, password };
-      await AsyncStorage.setItem("USER_DATA", JSON.stringify(userData));
-      Alert.alert("Sukses", "Registrasi Berhasil! Silakan Login.");
-      navigation.navigate("Login");
+      // 3. Mengirim request POST ke endpoint /register
+      const response = await api.post('/register', {
+        nama: username.trim(), // 'nama' harus sesuai dengan validasi di UserController.php
+        email: email.trim(),
+        password: password,
+      });
+
+      setIsLoading(false);
+
+      // Jika berhasil, tampilkan pesan sukses dari Laravel
+      Alert.alert("Sukses", response.data.message || "Registrasi Berhasil! Silakan Login.", [
+        { text: "OK", onPress: () => navigation.navigate("Login") }
+      ]);
+
     } catch (error) {
-      Alert.alert("Error", "Gagal menyimpan data");
+      setIsLoading(false);
+
+      // 4. Menangkap pesan error dari Laravel
+      if (error.response) {
+        // Status 422: Validasi gagal (misal: email sudah dipakai)
+        if (error.response.status === 422) {
+          // Menangkap detail error dari validasi Laravel
+          const validationErrors = error.response.data;
+          
+          if (validationErrors.email) {
+            Alert.alert("Gagal Daftar", "Email ini sudah terdaftar. Silakan gunakan email lain atau langsung Login.");
+          } else {
+            Alert.alert("Gagal Daftar", "Mohon periksa kembali data yang Anda masukkan.");
+          }
+        } else {
+          Alert.alert("Error Server", `Terjadi kesalahan (Status: ${error.response.status})`);
+        }
+      } else {
+        // Jika server mati atau jaringan terputus
+        Alert.alert("Gagal Terhubung", "Pastikan server berjalan dan koneksi internet stabil.");
+      }
     }
   };
 

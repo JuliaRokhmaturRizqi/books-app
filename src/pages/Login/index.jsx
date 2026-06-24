@@ -6,6 +6,7 @@ import { Splash } from "../../assets/image";
 import { Google, Facebook, Twitter } from "../../assets/image";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "../../services/api";
 
 // --- DATA DUMMY AKUN GOOGLE ---
 const DUMMY_GOOGLE_ACCOUNTS = [
@@ -51,38 +52,58 @@ export default function Login({ navigation }) {
     }).start();
   }, []);
 
-  // 2. LOGIKA LOGIN MANUAL (Tetap Ada)
+  // 2. LOGIKA LOGIN DENGAN API LARAVEL
   const handleLogin = async () => {
+    // Validasi input kosong
+    if (!email || !password) {
+      Alert.alert("Perhatian", "Email dan password tidak boleh kosong.");
+      return;
+    }
+
+    setLoadingText("Sedang masuk...");
+    setIsLoading(true);
+
     try {
-      const savedUserString = await AsyncStorage.getItem("USER_DATA");
+      // Mengirim request POST ke endpoint /login Laravel
+      const response = await api.post('/login', {
+        email: email.trim(),
+        password: password,
+      });
 
-      // DEBUG: Cek apa isi datanya
-      console.log("Data di HP:", savedUserString);
-      console.log("Input User:", email, password);
+      // Jika berhasil, Laravel mengembalikan 'token' dan 'message'
+      const { token, message } = response.data;
 
-      if (savedUserString) {
-        const savedUser = JSON.parse(savedUserString);
+      // Simpan token ke AsyncStorage untuk otorisasi endpoint lain
+      await AsyncStorage.setItem('userToken', token);
 
-        // Tambahkan .trim() untuk membuang spasi tidak sengaja
-        if (email.trim() === savedUser.email && password === savedUser.password) {
-          // ... (Logika Remember Me Tetap Sama) ...
-          if (isRemembered) {
-            const credentials = { email, password };
-            await AsyncStorage.setItem("REMEMBER_ME_DATA", JSON.stringify(credentials));
-          } else {
-            await AsyncStorage.removeItem("REMEMBER_ME_DATA");
-          }
+      // Logika Remember Me
+      if (isRemembered) {
+        const credentials = { email, password };
+        await AsyncStorage.setItem("REMEMBER_ME_DATA", JSON.stringify(credentials));
+      } else {
+        await AsyncStorage.removeItem("REMEMBER_ME_DATA");
+      }
 
-          Alert.alert("Login Sukses", `Halo, ${savedUser.username}!`);
-          navigation.navigate("MainApp");
+      setIsLoading(false);
+      Alert.alert("Login Berhasil", message || "Selamat datang!");
+      navigation.replace("MainApp"); // Gunakan replace agar tidak bisa di-back ke halaman login
+
+    } catch (error) {
+      setIsLoading(false);
+      
+      // Menangkap respon error dari Laravel
+      if (error.response) {
+        // Status 422 dari LoginController Laravel (Email/Password salah)
+        if (error.response.status === 422) {
+          const errorMessage = error.response.data.message || "Validasi gagal. Periksa input Anda.";
+          Alert.alert("Gagal Login", errorMessage);
         } else {
-          Alert.alert("Gagal", `Email/Pass Salah.\nData tersimpan saat ini:\nEmail: ${savedUser.email}\nPass: ${savedUser.password}`);
+          Alert.alert("Error Server", `Terjadi kesalahan (Status: ${error.response.status})`);
         }
       } else {
-        Alert.alert("Gagal", "Belum ada data user. Silakan daftar dulu.");
+        // Jika tidak ada respon (misal server mati atau IP salah)
+        Alert.alert("Gagal Terhubung", "Pastikan server Laravel berjalan (php artisan serve) dan IP Address di file api.js sudah benar.");
       }
-    } catch (error) {
-      Alert.alert("Error", "Kesalahan sistem");
     }
   };
 
